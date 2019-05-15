@@ -986,7 +986,7 @@ class diff_calc:
         # low cs buff (credits to osuElements)
         if radius < CIRCLESIZE_BUFF_THRESHOLD:
             scaling_factor *= (
-                1.0 + min(CIRCLESIZE_BUFF_THRESHOLD - radius, 5.0) / 50.0
+                1.0 + min(CIRCLESIZE_BUFF_THRESHOLD - radius, 9.25) / 22.5
             )
 
 
@@ -1221,12 +1221,12 @@ def ppv2(
     # global values -----------------------------------------------
     nobjects_over_2k = nobjects / 2000.0
 
-    length_bonus = 0.95 + 0.4 * min(1.0, nobjects_over_2k)
+    length_bonus = 0.95 + 0.5 * min(1.0, nobjects_over_2k)
 
     if nobjects > 2000:
         length_bonus += math.log10(nobjects_over_2k) * 0.5
 
-    miss_penality = pow(0.97, nmiss)
+    miss_penality = pow(0.97, nmiss + (n50 * 0.35))
     combo_break = pow(combo, 0.8) / pow(max_combo, 0.8)
 
     # calculate stats with mods
@@ -1236,12 +1236,17 @@ def ppv2(
 
     # ar bonus ----------------------------------------------------
     ar_bonus = 1.0
+    low_ar_bonus = 1.0
 
-    if ar > 10.33:
-        ar_bonus += 0.3 * (ar - 10.33)
+    # Akatsuki's custom PP variables!
+    streams_nerf = 1.0
 
-    elif ar < 8.0:
-        ar_bonus += 0.01 * (8.0 - ar)
+    if ar > 10.87:
+        ar_bonus += 0.65 * (ar - 10.87)
+
+    elif ar < 10.0:
+        low_ar_bonus = 0.025 * (10.0 - ar)
+        ar_bonus += low_ar_bonus
 
 
     # aim pp ------------------------------------------------------
@@ -1251,11 +1256,8 @@ def ppv2(
     aim *= combo_break
     aim *= ar_bonus
 
-    hd_bonus = 1.0
     if mods & MODS_HD != 0:
-        hd_bonus *= 1.0 + 0.04 * (12.0 - ar)
-
-    aim *= hd_bonus
+        aim *= (1.02 + math.pow(11.0 - ar, 1.2) * 0.035)
 
     if mods & MODS_FL != 0:
         fl_bonus = 1.0 + 0.35 * min(1.0, nobjects / 200.0)
@@ -1266,50 +1268,48 @@ def ppv2(
         aim *= fl_bonus
 
     acc_bonus = 0.5 + accuracy / 2.0
-    od_squared = od * od;
-    od_bonus = 0.98 + od_squared / 2500.0
+
+    # od bonus (only applied on relax if od is > 10 due to being overweighted
+    # and insignificant otherwise)
+    # 1.0 - 1.0571
+    # 1.0+\frac{\left(10.0-x\right)^2}{17.5}
+    od_bonus = (1.0 + math.pow(10.0 - od, 2.0) / 12.5) if od > 10.0 else 1.0
+
+    # akatsuki's main accuracy / aim pp crossover | 0.6 - 1.1 (mymaxed to 0.75)
+    # 0.6+\frac{x^{3}}{2}
+    aim_crosscheck = max(0.75, 0.6 + math.pow(real_acc, 3.0) / 2.0)
 
     aim *= acc_bonus
     aim *= od_bonus
+    aim *= aim_crosscheck
 
     # speed pp ----------------------------------------------------
     speed = pp_base(speed_stars)
-    speed *= length_bonus
-    speed *= miss_penality
-    speed *= combo_break
-    if ar > 10.33:
-        speed *= ar_bonus
-    speed *= hd_bonus
-
-    speed *= 0.02 + accuracy
-    speed *= 0.96 + od_squared / 1600.0
 
     # acc pp ------------------------------------------------------
-    acc = pow(1.52163, od) * pow(real_acc, 24.0) * 2.83
+    acc = pow(1.52163, 5.0 + od / 2.0) * pow(real_acc, 18.0) * 2.83
 
     # length bonus (not the same as speed/aim length bonus)
     acc *= min(1.15, pow(ncircles / 1000.0, 0.3))
 
     if mods & MODS_HD != 0:
-        acc *= 1.08
+        acc *= 1.035
 
     if mods & MODS_FL != 0:
         acc *= 1.02
 
     # total pp ----------------------------------------------------
-    final_multiplier = 1.12
 
-    if mods & MODS_NF != 0:
-        final_multiplier *= 0.90
-
-    if mods & MODS_SO != 0:
-        final_multiplier *= 0.95
+    # Akatsuki's outdated stream nerfs; from pre-feb 2019 pp changes
+    # streams_nerf = aim / speed
+    # if streams_nerf < 1.0:
+    #     aim *= math.pow(math.pow(streams_nerf, 0.75), 1.075)
 
     total = (
         pow(
-            pow(aim, 1.1) + pow(speed, 1.1) + pow(acc, 1.1),
-            1.0 / 1.1
-        ) * final_multiplier
+            pow(aim, 1.158) + pow(acc, 1.186),
+            0.99 / 1.1
+        )
     )
 
     return (total, aim, speed, acc, accuracy * 100.0)
