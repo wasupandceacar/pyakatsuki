@@ -1236,15 +1236,15 @@ def ppv2(
 
     # ar bonus ----------------------------------------------------
     ar_bonus = 1.0
-    low_ar_bonus = 1.0
 
     # Akatsuki's custom PP variables!
     streams_nerf = 1.0
+    aim_crosscheck = 1.0
 
-    if ar > 10.87:
+    if ar >= 10.87:
         ar_bonus += 0.65 * (ar - 10.87)
 
-    elif ar < 10.0:
+    elif ar <= 10.0:
         low_ar_bonus = 0.025 * (10.0 - ar)
         ar_bonus += low_ar_bonus
 
@@ -1313,7 +1313,6 @@ def ppv2(
     )
 
     return (total, aim, speed, acc, accuracy * 100.0)
-
 
 # -------------------------------------------------------------------------
 # usage example
