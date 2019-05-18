@@ -647,8 +647,9 @@ def mods_apply(mods, ar = None, od = None, cs = None, hp = None):
     returned as None.
     """
 
-    OD0_MS = 80
-    OD10_MS = 20
+    # old threshold of odms
+    OD0_MS = 79.5
+    OD10_MS = 19.5
     AR0_MS = 1800
     AR5_MS = 1200
     AR10_MS = 450
@@ -919,7 +920,8 @@ class diff_calc:
 
 
         # don't forget to add the last strain
-        self.strains.append(max_strain)
+        # Akatsuki don't use this
+        # self.strains.append(max_strain)
 
         # weight the top strains sorted from highest to lowest
         weight = 1.0
