@@ -1243,11 +1243,11 @@ def ppv2(
     streams_nerf = 1.0
     aim_crosscheck = 1.0
 
-    if ar >= 10.87:
-        ar_bonus += 0.65 * (ar - 10.87)
+    if ar >= 10.7:
+        ar_bonus += 0.45 * (ar - 10.7)
 
-    elif ar <= 10.0:
-        low_ar_bonus = 0.025 * (10.0 - ar)
+    elif ar <= 8.5:
+        low_ar_bonus = 0.025 * (8.5 - ar)
         ar_bonus += low_ar_bonus
 
 
@@ -1277,7 +1277,7 @@ def ppv2(
     # 1.0+\frac{\left(10.0-x\right)^2}{17.5}
     od_bonus = (1.0 + math.pow(10.0 - od, 2.0) / 12.5) if od > 10.0 else 1.0
 
-    # akatsuki's main accuracy / aim pp crossover | 0.6 - 1.1 (mymaxed to 0.75)
+    # akatsuki's main accuracy / aim pp crosscheck | 0.6 - 1.1 (max to 0.75)
     # 0.6+\frac{x^{3}}{2}
     aim_crosscheck = max(0.75, 0.6 + math.pow(real_acc, 3.0) / 2.0)
 
