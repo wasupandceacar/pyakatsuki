@@ -1223,7 +1223,7 @@ def ppv2(
     # global values -----------------------------------------------
     nobjects_over_2k = nobjects / 2000.0
 
-    length_bonus = 0.95 + 0.5 * min(1.0, nobjects_over_2k)
+    length_bonus = 0.95 + 0.4 * min(1.0, nobjects_over_2k)
 
     if nobjects > 2000:
         length_bonus += math.log10(nobjects_over_2k) * 0.5
@@ -1258,8 +1258,12 @@ def ppv2(
     aim *= combo_break
     aim *= ar_bonus
 
+    hd_bonus = 1.0
+
     if mods & MODS_HD != 0:
-        aim *= (1.02 + math.pow(11.0 - ar, 1.2) * 0.035)
+        hd_bonus += 0.04 * (12.0 - ar)
+
+    aim *= hd_bonus
 
     if mods & MODS_FL != 0:
         fl_bonus = 1.0 + 0.35 * min(1.0, nobjects / 200.0)
@@ -1295,10 +1299,10 @@ def ppv2(
     acc *= min(1.15, pow(ncircles / 1000.0, 0.3))
 
     if mods & MODS_HD != 0:
-        acc *= 1.035
+        acc *= 1.08
 
-    if mods & MODS_FL != 0:
-        acc *= 1.02
+    # if mods & MODS_FL != 0:
+    #     acc *= 1.02
 
     # total pp ----------------------------------------------------
 
